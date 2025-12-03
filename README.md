@@ -30,3 +30,15 @@ Connectar Client / Servidor.
 Consultar dades d'usuari per nom.
 
 [Diagrama d'arquitectura prototip 1](charts/diagramaprototip1.mermaid)
+
+Definicion del en-point del webService:
+
+URL Server desenvolupament: http://localhost:5000/
+
+| URL | Method | Parametros | Descripcion | Output |
+|--------------|------------|-------------|--------|---------|
+|/user   | GET | username <String> obligatorio | Retorna la informacion de | {
+    "code_response=1, descripcion="", name="Gustavo Lloris",
+    username="glloris",passwoprd="12345", rol="tutor", email="glloris@xtec.cat"
+}
+
