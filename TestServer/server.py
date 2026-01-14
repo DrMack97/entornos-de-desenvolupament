@@ -30,8 +30,5 @@ def sumar():
         return jsonify({'error': '"numero" debe ser un entero'}), 400
     return jsonify({'resultado': resultado})
 
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
