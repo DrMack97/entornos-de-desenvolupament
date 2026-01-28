@@ -1,8 +1,15 @@
+%% =============================================
+    %% Sistema de Gestión de Eventos 
+%% =============================================
+
 classDiagram
+    direction TB
+    
     %% =============================================
-    %% CLASE BASE: USUARIO
+    %% GRUPO 1: JERARQUÍA DE USUARIOS (HERENCIA)
     %% =============================================
     class Usuario {
+        <<abstract>>
         #id: String
         #nombre: String
         #email: String
@@ -11,12 +18,6 @@ classDiagram
         +iniciarSesion()
         +cerrarSesion()
     }
-    
-    %% =============================================
-    %% HERENCIA: TIPOS DE USUARIO
-    %% =============================================
-    Usuario <|-- Cliente
-    Usuario <|-- Administrador
     
     class Cliente {
         -telefono: String
@@ -33,8 +34,11 @@ classDiagram
         +generarReporte()
     }
     
+    Usuario <|-- Cliente
+    Usuario <|-- Administrador
+    
     %% =============================================
-    %% CLASE EVENTO
+    %% GRUPO 2: GESTIÓN DE EVENTOS
     %% =============================================
     class Evento {
         -id: String
@@ -49,9 +53,10 @@ classDiagram
     }
     
     %% =============================================
-    %% CLASE ENTRADA (CLASE BASE)
+    %% GRUPO 3: JERARQUÍA DE ENTRADAS (HERENCIA)
     %% =============================================
     class Entrada {
+        <<abstract>>
         #id: String
         #precio: float
         #asiento: String
@@ -61,12 +66,6 @@ classDiagram
         +cancelar()
         +mostrarInfo()
     }
-    
-    %% =============================================
-    %% HERENCIA: TIPOS DE ENTRADA
-    %% =============================================
-    Entrada <|-- EntradaGeneral
-    Entrada <|-- EntradaVIP
     
     class EntradaGeneral {
         -zona: String
@@ -80,8 +79,11 @@ classDiagram
         +estacionamientoGratis()
     }
     
+    Entrada <|-- EntradaGeneral
+    Entrada <|-- EntradaVIP
+    
     %% =============================================
-    %% CLASE PAGO
+    %% GRUPO 4: SISTEMA DE PAGOS
     %% =============================================
     class Pago {
         -id: String
@@ -95,30 +97,19 @@ classDiagram
     }
     
     %% =============================================
-    %% RELACIONES ENTRE CLASES
+    %% RELACIONES PRINCIPALES (CENTRALIZADAS)
     %% =============================================
     
-    %% Relación de Composición: Evento compuesto de Entradas
-    %% Si se elimina el Evento, se eliminan todas sus Entradas
-    Evento "1" *-- "0..*" Entrada : contiene
-    
-    %% Relación de Asociación: Cliente compra Entradas
-    Cliente "1" --> "0..*" Entrada : compra
-    
-    %% Relación de Asociación: Administrador gestiona Eventos
+    %% Relación 1: Gestión de Eventos por Administrador
     Administrador "1" --> "0..*" Evento : gestiona
     
-    %% Relación de Agregación: Cliente realiza Pagos
-    Cliente "1" o-- "0..*" Pago : realiza
+    %% Relación 2: Composición Evento-Entrada
+    Evento "1" *-- "0..*" Entrada : contiene
     
-    %% Relación 1 a 1: Cada Entrada tiene un Pago
-    Entrada "1" -- "1" Pago : está asociada a
+    %% Relación 3: Cliente compra Entradas
+    Cliente "1" --> "0..*" Entrada : compra
     
-    %% Relación de Dependencia: Pago depende de Entrada
-    Pago ..> Entrada : referencia
-    
-    note for Evento "La capacidad máxima del evento\ndetermina la cantidad máxima\nde entradas disponibles"
-    
-    note for Pago "El estado del pago puede ser:\nPENDIENTE, COMPLETADO, RECHAZADO\no CANCELADO"
-    
-    note for Entrada "Patrón de herencia permite\nextender fácilmente con\nnuevos tipos de entrada"
+    %% Relación 4: Sistema de Pagos
+    Cliente "1" --> "0..*" Pago : realiza
+    Entrada "1" -- "1" Pago : tiene
+    Pago ..> Entrada : referencia para
