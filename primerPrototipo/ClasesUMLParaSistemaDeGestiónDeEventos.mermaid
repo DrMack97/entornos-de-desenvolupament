@@ -1,0 +1,124 @@
+classDiagram
+    %% =============================================
+    %% CLASE BASE: USUARIO
+    %% =============================================
+    class Usuario {
+        #id: String
+        #nombre: String
+        #email: String
+        #contraseña: String
+        +registrar()
+        +iniciarSesion()
+        +cerrarSesion()
+    }
+    
+    %% =============================================
+    %% HERENCIA: TIPOS DE USUARIO
+    %% =============================================
+    Usuario <|-- Cliente
+    Usuario <|-- Administrador
+    
+    class Cliente {
+        -telefono: String
+        -direccion: String
+        +comprarEntrada()
+        +verHistorialCompras()
+    }
+    
+    class Administrador {
+        -nivelAcceso: String
+        +crearEvento()
+        +modificarEvento()
+        +eliminarEvento()
+        +generarReporte()
+    }
+    
+    %% =============================================
+    %% CLASE EVENTO
+    %% =============================================
+    class Evento {
+        -id: String
+        -nombre: String
+        -fecha: Date
+        -hora: Time
+        -lugar: String
+        -capacidadMaxima: int
+        -descripcion: String
+        +mostrarDetalles()
+        +verDisponibilidad()
+    }
+    
+    %% =============================================
+    %% CLASE ENTRADA (CLASE BASE)
+    %% =============================================
+    class Entrada {
+        #id: String
+        #precio: float
+        #asiento: String
+        #fechaCompra: Date
+        #estado: String
+        +reservar()
+        +cancelar()
+        +mostrarInfo()
+    }
+    
+    %% =============================================
+    %% HERENCIA: TIPOS DE ENTRADA
+    %% =============================================
+    Entrada <|-- EntradaGeneral
+    Entrada <|-- EntradaVIP
+    
+    class EntradaGeneral {
+        -zona: String
+        +accederEvento()
+    }
+    
+    class EntradaVIP {
+        -beneficios: String[]
+        -accesoPreferencial: boolean
+        +accesoLounge()
+        +estacionamientoGratis()
+    }
+    
+    %% =============================================
+    %% CLASE PAGO
+    %% =============================================
+    class Pago {
+        -id: String
+        -monto: float
+        -fecha: Date
+        -metodoPago: String
+        -estado: String
+        +procesarPago()
+        +generarRecibo()
+        +verificarEstado()
+    }
+    
+    %% =============================================
+    %% RELACIONES ENTRE CLASES
+    %% =============================================
+    
+    %% Relación de Composición: Evento compuesto de Entradas
+    %% Si se elimina el Evento, se eliminan todas sus Entradas
+    Evento "1" *-- "0..*" Entrada : contiene
+    
+    %% Relación de Asociación: Cliente compra Entradas
+    Cliente "1" --> "0..*" Entrada : compra
+    
+    %% Relación de Asociación: Administrador gestiona Eventos
+    Administrador "1" --> "0..*" Evento : gestiona
+    
+    %% Relación de Agregación: Cliente realiza Pagos
+    Cliente "1" o-- "0..*" Pago : realiza
+    
+    %% Relación 1 a 1: Cada Entrada tiene un Pago
+    Entrada "1" -- "1" Pago : está asociada a
+    
+    %% Relación de Dependencia: Pago depende de Entrada
+    Pago ..> Entrada : referencia
+    
+    note for Evento "La capacidad máxima del evento\ndetermina la cantidad máxima\nde entradas disponibles"
+    
+    note for Pago "El estado del pago puede ser:\nPENDIENTE, COMPLETADO, RECHAZADO\no CANCELADO"
+    
+    note for Entrada "Patrón de herencia permite\nextender fácilmente con\nnuevos tipos de entrada"
