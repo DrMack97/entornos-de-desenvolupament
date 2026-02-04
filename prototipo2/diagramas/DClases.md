@@ -1,19 +1,11 @@
 classDiagram
-    User -- Role : "tiene (1:1)"
-    User -- Tap : "registra (1:N)"
-    Child -- Tap : "tiene (1:N)"
-    Tap -- Status : "tiene estado (1:1)"
-    Child -- Treatment : "recibe (1:1)"
-    User -- UserChildRelation : "relacionado"
-    Child -- UserChildRelation : "relacionado"
-    UserChildRelation -- Role : "con rol"
-    
     class User {
         +int id
         +string username
         +string password
         +string email
         +int idrole
+        +__str__() string
     }
     
     class Child {
@@ -53,3 +45,5 @@ classDiagram
         +int child_id
         +int rol_id
     }
+    
+   
