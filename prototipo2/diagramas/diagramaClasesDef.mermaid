@@ -1,0 +1,112 @@
+
+%% =============================================
+    %% CLASES PRINCIPALES
+%% =============================================
+classDiagram
+    class webService {
+        <<interface>>
+        +String definicion
+        +List~String~ endPoints
+        +Response getRequest(String endpoint)
+        +Response postRequest(String endpoint, Object data)
+        +Response putRequest(String endpoint, Object data)
+        +Response deleteRequest(String endpoint)
+    }
+
+    class DaoUser {
+        -Connection connection
+        -String tableName
+        +User findById(int id)
+        +List~User~ findAll()
+        +boolean save(User user)
+        +boolean update(User user)
+        +boolean delete(int id)
+    }
+
+    class DaoChild {
+        -Connection connection
+        -String tableName
+        +Child findById(int id)
+        +List~Child~ findAll()
+        +List~Child~ findByUserId(int userId)
+        +boolean save(Child child)
+        +boolean update(Child child)
+        +boolean delete(int id)
+    }
+
+    class DaoTap {
+        -Connection connection
+        -String tableName
+        +Tap findById(int id)
+        +List~Tap~ findAll()
+        +List~Tap~ findByChildId(int childId)
+        +boolean save(Tap tap)
+        +boolean update(Tap tap)
+        +boolean delete(int id)
+    }
+
+    class User {
+        -int id
+        -String nombre
+        -String email
+        -String password
+        -Date fechaRegistro
+        +User()
+        +User(String nombre, String email)
+        +int getId()
+        +void setId(int id)
+        +String getNombre()
+        +void setNombre(String nombre)
+        +String getEmail()
+        +void setEmail(String email)
+        +boolean validarPassword(String password)
+    }
+
+    class Child {
+        -int id
+        -String nombre
+        -int edad
+        -int userId
+        -String genero
+        -Date fechaNacimiento
+        +Child()
+        +Child(String nombre, int edad, int userId)
+        +int getId()
+        +void setId(int id)
+        +String getNombre()
+        +void setNombre(String nombre)
+        +int getEdad()
+        +void setEdad(int edad)
+        +int getUserId()
+        +void setUserId(int userId)
+    }
+
+    class Tap {
+        -int id
+        -int childId
+        -Date fechaHora
+        -String tipoTap
+        -double duracion
+        -String observaciones
+        +Tap()
+        +Tap(int childId, String tipoTap)
+        +int getId()
+        +void setId(int id)
+        +int getChildId()
+        +void setChildId(int childId)
+        +Date getFechaHora()
+        +void setFechaHora(Date fechaHora)
+        +String getTipoTap()
+        +void setTipoTap(String tipoTap)
+    }
+
+    webService --> DaoUser : usa
+    webService --> DaoChild : usa
+    webService --> DaoTap : usa
+    
+    DaoUser --> User : gestiona
+    DaoChild --> Child : gestiona
+    DaoTap --> Tap : gestiona
+    
+    User "1" --> "0..*" Child : tiene
+    Child "1" --> "0..*" Tap : realiza
