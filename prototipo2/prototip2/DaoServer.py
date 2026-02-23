@@ -27,8 +27,23 @@ class UserDAO:
     def getUserRole(self,user_id):
         return [relation['rol_id'] for relation in relation_user_child if relation['user_id'] == user_id]
 
+class ChildDao:
+    def __init__ (self):
+        self.childs = children
+        self.relation_user_child = relation_user_child
+        
+    def getChild(self, user):
+        # Get IDs
+        child_ids = {r['child_id'] for r in self.relation_user_child if r['user_id'] == user.id}
+        #for in que devuelve relation_user_child (esta en dadesSERVER) y pone dento de R
+        #retrun Child Objects
+        return [c.__dict__ for c in self.childs if c.id in child_ids]
 
 
+cDao= ChildDao()
+u=User(id=1, username="", password="", email="", idrole=1, token="")
+listChilds=cDao.getChild(u)
+print(listChilds)
 
 #####################################################
 #  Test / Proves Codi per veure funcionament 

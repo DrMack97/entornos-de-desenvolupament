@@ -49,5 +49,23 @@ def login():
         )
     return jsonify(asdict(response)),200
 
+
+@app.route('/login', methods=['POST'])
+def child():
+    data = request.get_json()
+    user_id = data.get('id_user') #id_user
+    reponse = ApiResponse(
+        msg="Child",
+        coderesponse="-1",
+        data=""
+    )
+if(not user_id and not user_id.is_integer):
+    return jsonify(asdict(response)),400
+
+
+user_id=int(user_id)
+u=User(id=user_id, usarname="", password="", email="", id)
+listChilds=child
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
