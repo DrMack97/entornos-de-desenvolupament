@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from DaoServer import UserDAO
+from DaoServer import UserDAO, ChildDao
 from dadesServer import *
 from dataclasses import dataclass, asdict
 
@@ -7,10 +7,11 @@ from dataclasses import dataclass, asdict
 class ApiResponse():
     msg: str
     coderesponse: str
-    data: list
+    data: object  # FIX: 'list' era demasiado restrictivo, puede ser None o dict
 
-# Instantiate DAO
-userDao=UserDAO()
+# Instantiate DAOs
+userDao = UserDAO()
+childDao = ChildDao()
 
 app = Flask(__name__)
 
@@ -21,56 +22,55 @@ def getusers():
         coderesponse="1",
         data=userDao.getAllUsers()
     )
-    return jsonify(asdict(response)),200
+    return jsonify(asdict(response)), 200
 
 
 @app.route('/login', methods=['POST'])
 def login():
-    # Existing username/password login
     data = request.get_json()
-    identifier = data.get('username')  # username or email
+    identifier = data.get('username')  # username o email
     password = data.get('password')
     user = userDao.login(identifier, password)
-    response = ApiResponse(
-            msg="login",
-            coderesponse="-1",
-            data=user
-        )
+
     if user:
         response = ApiResponse(
             msg="Authenticated",
             coderesponse="1",
-            data=user
+            data=user.__dict__  # FIX: serializar el objeto User como dict
         )
+        return jsonify(asdict(response)), 200
     else:
         response = ApiResponse(
             msg="Not authenticated",
             coderesponse="0",
-            data=user
+            data=None
         )
-    return jsonify(asdict(response)),200
+        return jsonify(asdict(response)), 200
 
 
 @app.route('/Child', methods=['POST'])
 def child():
     data = request.get_json()
-    user_id = data.get('id_user') #id_user
-    reponse = ApiResponse(
-        msg="Child",
-        coderesponse="-1",
-        data=""
-    )
-    if(not user_id and not user_id.is_integer):
-        return jsonify(asdict(reponse)),400
+    user_id = data.get('id_user')
 
+    response = ApiResponse(msg="Child", coderesponse="-1", data="")
 
-    user_id=int(user_id)
-    u=User(id=user_id, usarname="", password="", email="", edrole=1, token="")
-    listChilds=childDao.getChilds(u)
-    reponse.corereponse="1"
-    reponse.msg=len(listChilds)
-    reponse.data=listChilds
-    return jsonify(asdict(reponse)),200
+    # FIX: validación corregida (la original tenía typos y lógica incorrecta)
+    if user_id is None:
+        return jsonify(asdict(response)), 400
+
+    try:
+        user_id = int(user_id)
+    except (ValueError, TypeError):
+        return jsonify(asdict(response)), 400
+
+    u = User(id=user_id, username="", password="", email="", idrole=1, token="")
+    listChilds = childDao.getChild(u)  # FIX: era getChilds (typo)
+    response.coderesponse = "1"        # FIX: era corereponse (typo)
+    response.msg = str(len(listChilds))
+    response.data = listChilds
+    return jsonify(asdict(response)), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
