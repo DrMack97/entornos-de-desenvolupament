@@ -1,0 +1,52 @@
+sequenceDiagram 
+
+    title Login with Token: Secure Services 
+
+ 
+
+    participant Client as Cliente 
+
+    participant Server as Servidor 
+
+    participant BBDD as Base de Datos 
+
+ 
+
+    rect rgb(200, 230, 255) 
+
+        Note over Client,Server: 🔐 Autenticación inicial 
+
+        Client->>Server: request HTTPS login/ method POST, params: username/password 
+
+        Server->>BBDD: generate Token for user and storage in table user 
+
+        Server->>Client: If Login OK Generate Token, response HTTPS Body (Json) Info User and Token 
+
+    end 
+
+ 
+
+    rect rgb(210, 255, 210) 
+
+        Note over Client,BBDD: ✅ Token válido - Usuario A 
+
+        Client->>Server: request HTTPS Child/ Header TokenUserA 
+
+        Server->>BBDD: Validate TokenUserA / UserA in BBDD 
+
+        Server->>Client: If Validate OK Generate Token, response HTTPS Body (Json) Info childs of UserA 
+
+    end 
+
+
+    rect rgb(255, 210, 210) 
+
+        Note over Client,BBDD: ❌ Token inválido - Usuario B 
+
+        Client->>Server: request HTTPS Child/ Header TokenUserB 
+
+        Server->>BBDD: TokenUserB doesn't exist in BBDD 
+
+        Server->>Client: response HTTPS Body (Json) Error: Authenticated Service 
+
+    end 

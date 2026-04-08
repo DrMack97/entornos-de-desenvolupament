@@ -1,0 +1,58 @@
+sequenceDiagram
+    autonumber
+    title Gestión de Childs por UserA (Token Válido)
+
+    participant C as Cliente (App/Web)
+    participant S as Servidor (API)
+    participant B as Base de Datos
+
+    box rgb(240, 248, 255) Visualización y Selección
+    Note over C, S: El usuario entra a la sección "Mis Hijos"
+    C->>+S: GET /api/childs (Header: TokenUserA)
+    S->>+B: Consultar Childs asignados a UserA
+    B-->>-S: Lista de Childs (pueden ser 0 o varios)
+    S-->>-C: JSON [ {id: 1, nombre: "Hijo 1", estado: "activo"}, ... ]
+    end
+
+    Note over C: UserA decide realizar una acción
+
+    alt Acción: AGREGAR Nuevo Child
+        C->>+S: POST /api/childs (Header: TokenUserA, Body: {nombre: "Nuevo"})
+        S->>B: Verificar límite de Childs (opcional)
+        S->>+B: INSERT INTO childs (nombre, user_id, estado) VALUES (...)
+        B-->>-S: Confirmación INSERT (ID generado)
+        S-->>-C: 201 Created (JSON del nuevo Child)
+
+    else Acción: EDITAR Información
+        Note right of C: UserA selecciona Hijo ID: 1
+        C->>+S: PUT /api/childs/1 (Header: TokenUserA, Body: {nombre: "Hijo 1 Editado"})
+        S->>+B: UPDATE childs SET nombre = ... WHERE id = 1 AND user_id = UserA
+        Note right of S: Validación crucial: El Child pertenece a UserA
+        B-->>-S: Confirmación UPDATE
+        S-->>-C: 200 OK (JSON actualizado)
+
+    else Acción: CAMBIAR ESTADO (Activar/Desactivar)
+        C->>+S: PATCH /api/childs/1/status (Header: TokenUserA, Body: {estado: "inactivo"})
+        S->>+B: UPDATE childs SET estado = 'inactivo' WHERE id = 1 AND user_id = UserA
+        B-->>-S: Confirmación UPDATE
+        S-->>-C: 200 OK
+
+    else Acción: ELIMINAR (Borrado Lógico o Físico)
+        C->>+S: DELETE /api/childs/1 (Header: TokenUserA)
+        S->>+B: DELETE FROM childs WHERE id = 1 AND user_id = UserA
+        B-->>-S: Confirmación DELETE
+        S-->>-C: 204 No Content (Éxito sin cuerpo)
+    end
+
+    box rgb(255, 235, 235) Casos Contrarios (Errores)
+    Note over C, B: Ejemplos de fallos en las acciones anteriores
+    C-xS: Cualquier petición con Token Inválido/Expirado
+    S-->>C: 401 Unauthorized
+
+    C->>+S: GET /api/childs/999 (ID no existe o no es de UserA)
+    S->>+B: SELECT * FROM childs WHERE id = 999 AND user_id = UserA
+    B-->>-S: NULL (No encontrado)
+    S-->>-C: 404 Not Found
+    end
+
+    
