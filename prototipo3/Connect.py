@@ -7,7 +7,7 @@ def list_users():
     connection = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="davidmack97",
+        password="david",
         database="tapatapp"
     )
     cursor = connection.cursor(dictionary=True)

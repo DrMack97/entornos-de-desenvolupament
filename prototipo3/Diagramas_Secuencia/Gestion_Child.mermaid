@@ -2,58 +2,67 @@ sequenceDiagram
     autonumber
     title Gestión de Childs por UserA (Token Válido)
 
-    %% Definición de Boxes (Solo envuelven a los participantes)
-    box rgb(240, 248, 255) Visualización y Selección
-        participant C as Cliente (App/Web)
-        participant S as Servidor (API)
-    end
+    %% Definición de participantes (al inicio, sin boxes)
+    participant C as Cliente (App/Web)
+    participant S as Servidor (API)
     participant B as Base de Datos
 
-    %% Flujo de Visualización
-    Note over C, S: El usuario entra a la sección "Mis Hijos"
-    C->>+S: GET /api/childs (Header: TokenUserA)
-    S->>+B: Consultar Childs asignados a UserA
-    B-->>-S: Lista de Childs (pueden ser 0 o varios)
-    S-->>-C: JSON [ {id: 1, nombre: "Hijo 1", estado: "activo"}, ... ]
+    %% Rectángulo de fondo para toda la sección de acciones exitosas (azul claro)
+    rect rgba(240, 248, 255, 0.7)
+        Note left of C: UserA entra a "Mis Hijos"
+        Note right of C: Título de sección: Visualización y Selección
+        
+        %% Flujo de Visualización
+        C->>+S: GET /api/childs [Header: TokenUserA]
+        S->>+B: Consultar Childs asignados a UserA
+        B-->>-S: Lista de Childs (0 o varios)
+        S-->>-C: JSON [ {id: 1, nombre: "Hijo 1", ...}, ... ]
 
-    Note over C: UserA decide realizar una acción
+        Note left of C: UserA decide realizar una acción
 
-    alt Acción: AGREGAR Nuevo Child
-        C->>+S: POST /api/childs (Header: TokenUserA, Body: {nombre: "Nuevo"})
-        S->>B: Verificar límite de Childs (opcional)
-        S->>+B: INSERT INTO childs (nombre, user_id, estado) VALUES (...)
-        B-->>-S: Confirmación INSERT (ID generado)
-        S-->>-C: 201 Created (JSON del nuevo Child)
+        %% Bloque Alt con las acciones principales
+        alt Acción: AGREGAR Nuevo Child
+            C->>+S: POST /api/childs [Header: TokenUserA, Body: {nombre}]
+            S->>B: Verificar límite (opcional)
+            S->>+B: INSERT INTO childs (...)
+            B-->>-S: Confirmación INSERT (Nuevo ID)
+            S-->>-C: 201 Created (JSON del nuevo Child)
 
-    else Acción: EDITAR Información
-        Note right of C: UserA selecciona Hijo ID: 1
-        C->>+S: PUT /api/childs/1 (Header: TokenUserA, Body: {nombre: "Hijo 1 Editado"})
-        S->>+B: UPDATE childs SET nombre = ... WHERE id = 1 AND user_id = UserA
-        Note right of S: Validación crucial: El Child pertenece a UserA
-        B-->>-S: Confirmación UPDATE
-        S-->>-C: 200 OK (JSON actualizado)
+        else Acción: EDITAR Información
+            Note right of C: UserA selecciona Hijo ID: 1
+            C->>+S: PUT /api/childs/1 [Header: TokenUserA, Body: {nombre}]
+            S->>+B: UPDATE childs SET ... WHERE id=1 AND user_id=UserA
+            Note right of S: Validación crucial: El Child pertenece a UserA
+            B-->>-S: Confirmación UPDATE
+            S-->>-C: 200 OK (JSON actualizado)
 
-    else Acción: CAMBIAR ESTADO (Activar/Desactivar)
-        C->>+S: PATCH /api/childs/1/status (Header: TokenUserA, Body: {estado: "inactivo"})
-        S->>+B: UPDATE childs SET estado = 'inactivo' WHERE id = 1 AND user_id = UserA
-        B-->>-S: Confirmación UPDATE
-        S-->>-C: 200 OK
+        else Acción: CAMBIAR ESTADO
+            C->>+S: PATCH /api/childs/1/status [Header: TokenUserA, Body: {estado}]
+            S->>+B: UPDATE childs SET estado=... WHERE id=1 AND user_id=UserA
+            B-->>-S: Confirmación UPDATE
+            S-->>-C: 200 OK
 
-    else Acción: ELIMINAR (Borrado Lógico o Físico)
-        C->>+S: DELETE /api/childs/1 (Header: TokenUserA)
-        S->>+B: DELETE FROM childs WHERE id = 1 AND user_id = UserA
-        B-->>-S: Confirmación DELETE
-        S-->>-C: 204 No Content (Éxito sin cuerpo)
+        else Acción: ELIMINAR (Lógico o Físico)
+            C->>+S: DELETE /api/childs/1 [Header: TokenUserA]
+            S->>+B: DELETE FROM childs WHERE id=1 AND user_id=UserA
+            B-->>-S: Confirmación DELETE
+            S-->>-C: 204 No Content
+        end
     end
 
-    %% Si quieres resaltar el área de errores, usa rect en lugar de box
-    rect rgb(255, 235, 235)
-        Note over C, B: Casos Contrarios (Errores)
-        C-xS: Cualquier petición con Token Inválido/Expirado
+    %% Rectángulo de fondo para la sección de errores (rojizo claro)
+    rect rgba(255, 235, 235, 0.7)
+        %% Nota centralizada para indicar la sección de errores
+        Note over C, S: Casos Contrarios (Errores)
+
+        %% Nota lateral para simplificar
+        Note right of C: Error 1: Petición con Token Inválido/Expirado
+        C-xS: GET /api/childs [Header: TokenInválido]
         S-->>C: 401 Unauthorized
 
-        C->>+S: GET /api/childs/999 (ID no existe o no es de UserA)
-        S->>+B: SELECT * FROM childs WHERE id = 999 AND user_id = UserA
+        Note right of C: Error 2: Recurso no encontrado (GET por ID inválido)
+        C->>+S: GET /api/childs/999 [Header: TokenUserA]
+        S->>+B: SELECT * FROM childs WHERE id=999 AND user_id=UserA
         B-->>-S: NULL (No encontrado)
         S-->>-C: 404 Not Found
     end
