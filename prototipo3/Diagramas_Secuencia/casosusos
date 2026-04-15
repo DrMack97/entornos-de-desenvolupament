@@ -1,29 +1,13 @@
----
-config:
-  theme: mc
-  layout: fixed
----
-flowchart LR
- subgraph Sistema_TapatApp["Sistema de Gestión TapatApp"]
-        UC_REG("RF1: Registrarse")
-        UC_LOG("RF2: Iniciar Sesión")
-        UC_ALTA_N("RF3: Alta de Niño")
-        UC_ALTA_C("RF6: Alta de Cuidadores")
-        UC_CTRL_P("RF4/RF7: Control de Parche")
-        UC_CONF_T("RF5: Configurar Tratamiento")
-        UC_T_FIJO("Tratamiento Tiempo Fijo")
-        UC_T_MITAD("Tratamiento 1/2 Tiempo")
-        UC_SHARE("Compartir Info con Médico")
-        UC_REP("Ver Reportes de Evolución")
-        UC_G_SIS("Gestionar Usuarios y Sistema")
-  end
-    Tutor(("Tutor / Padre")) --> UC_REG & UC_LOG & UC_ALTA_N & UC_ALTA_C & UC_CTRL_P & UC_CONF_T & UC_SHARE
-    Cuidador(("Cuidador")) --> UC_LOG & UC_CTRL_P
-    Medico(("Servicio Médico")) --> UC_LOG & UC_SHARE & UC_REP
-    Admin(("Administrador")) --> UC_LOG & UC_G_SIS
-    UC_CTRL_P -. «include» .-> UC_LOG
-    UC_CONF_T -. «include» .-> UC_LOG
-    UC_T_FIJO -- tipo --> UC_CONF_T
-    UC_T_MITAD -- tipo --> UC_CONF_T
-    UC_LOG --- Servidor["Servidor API"]
-    UC_CTRL_P --- BBDD[("Base de Datos")]
+sequenceDiagram
+    autonumber
+    participant A as Actor (Tutor/Médico)
+    participant S as Servidor (API)
+    participant B as Base de Datos
+
+    rect rgba(240, 248, 255, 0.7)
+        Note over A, B: Caso de Uso: Ver Niño (View Child)
+        A->>+S: GET /api/childs/{id} (Token)
+        S->>+B: Validar permisos y recuperar datos
+        B-->>-S: Datos del niño + Tratamiento
+        S-->>-A: 200 OK (JSON con perfil y estadísticas)
+    end

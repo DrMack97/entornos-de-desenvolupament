@@ -1,66 +1,79 @@
 graph LR
-    %% Definición de Actores
-    Tutor((Tutor / Padre))
-    Cuidador((Cuidador))
-    Medico((Servicio Médico))
-    Admin((Administrador))
-
-    subgraph Sistema_TapatApp [Sistema de Gestión TapatApp]
-        %% Acceso y Registro
-        UC_REG("RF1: Registrarse")
-        UC_LOG("RF2: Iniciar Sesión")
-
-        %% Gestión de Perfiles
-        UC_ALTA_N("RF3: Alta de Niño")
-        UC_ALTA_C("RF6: Alta de Cuidadores")
-
-        %% Control del Tratamiento
-        UC_CTRL_P("RF4/RF7: Control de Parche")
-        UC_CONF_T("RF5: Configurar Tratamiento")
-        
-        %% Tipos de tratamiento (Sub-casos)
-        UC_T_FIJO("Tratamiento Tiempo Fijo")
-        UC_T_MITAD("Tratamiento 1/2 Tiempo")
-
-        %% Otros objetivos
-        UC_SHARE("Compartir Info con Médico")
-        UC_REP("Ver Reportes de Evolución")
-        UC_G_SIS("Gestionar Usuarios y Sistema")
+    %% Actores Principales (Lado Izquierdo)
+    subgraph Actores
+        Tutor((Tutor / Padre))
+        Cuidador((Cuidador))
+        Medico((Servicio Médico))
+        Admin((Administrador))
     end
 
-    %% Relaciones del Tutor
+    subgraph Sistema_TapatApp [Sistema de Gestión TapatApp]
+        direction TB
+        
+        %% Módulo de Acceso
+        subgraph Modulo_Acceso [Acceso]
+            UC_REG("RF1: Registrarse")
+            UC_LOG("RF2: Iniciar Sesión")
+        end
+
+        %% Módulo de Gestión
+        subgraph Modulo_Gestion [Gestión de Perfiles]
+            UC_ALTA_N("RF3: Alta de Niño")
+            UC_ALTA_C("RF6: Alta de Cuidadores")
+            UC_SHARE("Compartir Info con Médico")
+        end
+
+        %% Módulo de Tratamiento (Core)
+        subgraph Modulo_Core [Tratamiento y Control]
+            UC_CONF_T("RF5: Configurar Tratamiento")
+            UC_CTRL_P("RF4/RF7: Control de Parche")
+            
+            %% Especializaciones
+            UC_T_FIJO("Tratamiento Tiempo Fijo")
+            UC_T_MITAD("Tratamiento 1/2 Tiempo")
+        end
+
+        %% Módulo Administrativo y Reportes
+        subgraph Modulo_Admin [Admin y Reportes]
+            UC_REP("Ver Reportes de Evolución")
+            UC_G_SIS("Gestionar Usuarios y Sistema")
+        end
+    end
+
+    %% Actores Secundarios / Sistemas (Lado Derecho)
+    Servidor[Servidor API]
+    BBDD[(Base de Datos)]
+
+    %% --- RELACIONES ---
+
+    %% Tutor: Acceso total a su flujo
     Tutor --> UC_REG
     Tutor --> UC_LOG
     Tutor --> UC_ALTA_N
     Tutor --> UC_ALTA_C
-    Tutor --> UC_CTRL_P
     Tutor --> UC_CONF_T
+    Tutor --> UC_CTRL_P
     Tutor --> UC_SHARE
 
-    %% Relaciones del Cuidador
+    %% Cuidador: Solo log y control
     Cuidador --> UC_LOG
     Cuidador --> UC_CTRL_P
 
-    %% Relaciones del Servicio Médico
+    %% Médico: Supervisión
     Medico --> UC_LOG
     Medico --> UC_SHARE
     Medico --> UC_REP
 
-    %% Relaciones del Administrador
+    %% Admin: Gestión total
     Admin --> UC_LOG
     Admin --> UC_G_SIS
 
-    %% Relaciones de Inclusión y Especialización
+    %% Lógica Interna (Includes y Tipos)
     UC_CTRL_P -. "«include»" .-> UC_LOG
     UC_CONF_T -. "«include»" .-> UC_LOG
-    
-    %% Relación de tipos de tratamiento
-    UC_T_FIJO -- "tipo" --> UC_CONF_T
-    UC_T_MITAD -- "tipo" --> UC_CONF_T
+    UC_T_FIJO -- "es un" --> UC_CONF_T
+    UC_T_MITAD -- "es un" --> UC_CONF_T
 
-    %% Actores Secundarios
-    Servidor[Servidor API]
-    BBDD[(Base de Datos)]
-
+    %% Conexiones Técnicas
     UC_LOG --- Servidor
     UC_CTRL_P --- BBDD
