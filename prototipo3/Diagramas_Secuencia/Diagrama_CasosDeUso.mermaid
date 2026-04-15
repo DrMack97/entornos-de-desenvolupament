@@ -1,0 +1,46 @@
+graph TD
+    %% Definición del Actor Principal
+    User((Usuario))
+
+    subgraph Sistema_Gestion_Childs [Sistema de Gestión de Hijos]
+        %% Casos de Uso Principales
+        UC1(Iniciar Sesión)
+        UC2(Listar Mis Hijos)
+        UC3(Agregar Nuevo Hijo)
+        UC4(Editar Información de Hijo)
+        UC5(Cambiar Estado de Hijo)
+        UC6(Eliminar Hijo)
+
+        %% Casos de Uso de Soporte / Extensiones
+        UC7(Validar Token)
+        UC8(Verificar Propiedad del Registro)
+        UC9(Error de Autenticación)
+    end
+
+    %% Definición de Sistemas Externos (Actores Secundarios)
+    Servidor[Servidor API]
+    BBDD[(Base de Datos)]
+
+    %% Relaciones del Usuario
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+
+    %% Relaciones de Inclusión y Extensión
+    UC2 -.-> << include >> .-> UC7
+    UC3 -.-> << include >> .-> UC7
+    UC4 -.-> << include >> .-> UC7
+    UC4 -.-> << include >> .-> UC8
+    UC5 -.-> << include >> .-> UC8
+    UC6 -.-> << include >> .-> UC8
+
+    UC7 -.-> << extend >> .-> UC9
+
+    %% Interacción con Sistemas de Soporte
+    UC1 --- Servidor
+    UC7 --- Servidor
+    UC8 --- BBDD
+    Servidor --- BBDD
