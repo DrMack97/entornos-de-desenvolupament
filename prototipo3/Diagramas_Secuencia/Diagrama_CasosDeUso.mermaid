@@ -29,15 +29,15 @@ graph TD
     User --> UC5
     User --> UC6
 
-    %% Relaciones de Inclusión y Extensión
-    UC2 -.-> << include >> .-> UC7
-    UC3 -.-> << include >> .-> UC7
-    UC4 -.-> << include >> .-> UC7
-    UC4 -.-> << include >> .-> UC8
-    UC5 -.-> << include >> .-> UC8
-    UC6 -.-> << include >> .-> UC8
+    %% Relaciones de Inclusión y Extensión (CORREGIDAS)
+    UC2 -. "«include»" .-> UC7
+    UC3 -. "«include»" .-> UC7
+    UC4 -. "«include»" .-> UC7
+    UC4 -. "«include»" .-> UC8
+    UC5 -. "«include»" .-> UC8
+    UC6 -. "«include»" .-> UC8
 
-    UC7 -.-> << extend >> .-> UC9
+    UC7 -. "«extend»" .-> UC9
 
     %% Interacción con Sistemas de Soporte
     UC1 --- Servidor
