@@ -5,26 +5,30 @@ graph LR
     Medico((Servicio Médico))
     Admin((Administrador))
 
-    subgraph TapatApp [Sistema de Gestión TapatApp]
-        %% RF1 y RF2: Acceso
-        UC_REG(RF1: Registrarse)
-        UC_LOG(RF2: Iniciar Sesión)
+    subgraph Sistema_TapatApp [Sistema de Gestión TapatApp]
+        %% Acceso y Registro
+        UC_REG("RF1: Registrarse")
+        UC_LOG("RF2: Iniciar Sesión")
 
         %% Gestión de Perfiles
-        UC_ALTA_N(RF3: Alta de Niño)
-        UC_ALTA_C(RF6: Alta de Cuidadores)
+        UC_ALTA_N("RF3: Alta de Niño")
+        UC_ALTA_C("RF6: Alta de Cuidadores")
 
-        %% Control del Tratamiento (Core del Negocio)
-        UC_CTRL_P(RF4/RF7: Control de Parche)
-        UC_CONF_T(RF5: Configurar Tratamiento)
+        %% Control del Tratamiento
+        UC_CTRL_P("RF4/RF7: Control de Parche")
+        UC_CONF_T("RF5: Configurar Tratamiento")
         
-        %% Objetivos Adicionales
-        UC_SHARE(Compartir Info con Médico)
-        UC_REP(Ver Reportes de Evolución)
-        UC_G_SIS(Gestionar Usuarios y Sistema)
+        %% Tipos de tratamiento (Sub-casos)
+        UC_T_FIJO("Tratamiento Tiempo Fijo")
+        UC_T_MITAD("Tratamiento 1/2 Tiempo")
+
+        %% Otros objetivos
+        UC_SHARE("Compartir Info con Médico")
+        UC_REP("Ver Reportes de Evolución")
+        UC_G_SIS("Gestionar Usuarios y Sistema")
     end
 
-    %% Relaciones del Tutor (Actor Principal)
+    %% Relaciones del Tutor
     Tutor --> UC_REG
     Tutor --> UC_LOG
     Tutor --> UC_ALTA_N
@@ -46,18 +50,17 @@ graph LR
     Admin --> UC_LOG
     Admin --> UC_G_SIS
 
-    %% Relaciones de Inclusión (Lógica de Negocio)
+    %% Relaciones de Inclusión y Especialización
     UC_CTRL_P -. "«include»" .-> UC_LOG
     UC_CONF_T -. "«include»" .-> UC_LOG
     
-    %% Relación de Especialización de Tratamiento
-    UC_CONF_T <|-- UC_T_FIJO(Tiempo Fijo Diario)
-    UC_CONF_T <|-- UC_T_MITAD(1/2 del Tiempo Despierto)
+    %% Relación de tipos de tratamiento
+    UC_T_FIJO -- "tipo" --> UC_CONF_T
+    UC_T_MITAD -- "tipo" --> UC_CONF_T
 
-    %% Actores Secundarios (Sistemas)
+    %% Actores Secundarios
     Servidor[Servidor API]
     BBDD[(Base de Datos)]
 
     UC_LOG --- Servidor
     UC_CTRL_P --- BBDD
-    UC_SHARE --- Medico
