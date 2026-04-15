@@ -1,79 +1,69 @@
 graph LR
-    %% Actores Principales (Lado Izquierdo)
-    subgraph Actores
-        Tutor((Tutor / Padre))
-        Cuidador((Cuidador))
-        Medico((Servicio Médico))
-        Admin((Administrador))
-    end
+    %% Actores Principales (Izquierda)
+    Tutor((Tutor / Padre))
+    Cuidador((Cuidador))
+    Medico((Servicio Médico))
 
     subgraph Sistema_TapatApp [Sistema de Gestión TapatApp]
         direction TB
         
-        %% Módulo de Acceso
-        subgraph Modulo_Acceso [Acceso]
+        subgraph Acceso [Gestión de Acceso]
             UC_REG("RF1: Registrarse")
             UC_LOG("RF2: Iniciar Sesión")
         end
 
-        %% Módulo de Gestión
-        subgraph Modulo_Gestion [Gestión de Perfiles]
+        subgraph Gestion_Pacientes [Gestión de Niños y Cuidadores]
             UC_ALTA_N("RF3: Alta de Niño")
             UC_ALTA_C("RF6: Alta de Cuidadores")
-            UC_SHARE("Compartir Info con Médico")
         end
 
-        %% Módulo de Tratamiento (Core)
-        subgraph Modulo_Core [Tratamiento y Control]
+        subgraph Tratamiento [Control de Rehabilitación]
             UC_CONF_T("RF5: Configurar Tratamiento")
-            UC_CTRL_P("RF4/RF7: Control de Parche")
-            
-            %% Especializaciones
             UC_T_FIJO("Tratamiento Tiempo Fijo")
             UC_T_MITAD("Tratamiento 1/2 Tiempo")
+            UC_CTRL_P("RF4/RF7: Control de Parche")
         end
 
-        %% Módulo Administrativo y Reportes
-        subgraph Modulo_Admin [Admin y Reportes]
+        subgraph Seguimiento [Médico y Reportes]
+            UC_SHARE("Compartir Info con Médico")
             UC_REP("Ver Reportes de Evolución")
             UC_G_SIS("Gestionar Usuarios y Sistema")
         end
     end
 
-    %% Actores Secundarios / Sistemas (Lado Derecho)
+    %% Actores de Gestión y Soporte (Derecha)
+    Admin((Administrador))
     Servidor[Servidor API]
     BBDD[(Base de Datos)]
 
-    %% --- RELACIONES ---
-
-    %% Tutor: Acceso total a su flujo
+    %% Relaciones Lógicas: Tutor
     Tutor --> UC_REG
     Tutor --> UC_LOG
     Tutor --> UC_ALTA_N
     Tutor --> UC_ALTA_C
-    Tutor --> UC_CONF_T
     Tutor --> UC_CTRL_P
+    Tutor --> UC_CONF_T
     Tutor --> UC_SHARE
 
-    %% Cuidador: Solo log y control
+    %% Relaciones Lógicas: Cuidador
     Cuidador --> UC_LOG
     Cuidador --> UC_CTRL_P
 
-    %% Médico: Supervisión
+    %% Relaciones Lógicas: Medico
     Medico --> UC_LOG
     Medico --> UC_SHARE
     Medico --> UC_REP
 
-    %% Admin: Gestión total
+    %% Relaciones Lógicas: Admin
     Admin --> UC_LOG
     Admin --> UC_G_SIS
 
-    %% Lógica Interna (Includes y Tipos)
+    %% Dependencias Técnicas (Includes y Flujos)
     UC_CTRL_P -. "«include»" .-> UC_LOG
     UC_CONF_T -. "«include»" .-> UC_LOG
-    UC_T_FIJO -- "es un" --> UC_CONF_T
-    UC_T_MITAD -- "es un" --> UC_CONF_T
+    UC_T_FIJO -- "tipo" --> UC_CONF_T
+    UC_T_MITAD -- "tipo" --> UC_CONF_T
 
-    %% Conexiones Técnicas
+    %% Interacción con Sistemas
     UC_LOG --- Servidor
     UC_CTRL_P --- BBDD
