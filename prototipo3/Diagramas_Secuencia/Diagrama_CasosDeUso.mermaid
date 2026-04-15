@@ -1,46 +1,59 @@
-graph TD
-    %% Definición del Actor Principal
+graph LR
+    %% Definición de Actores
     User((Usuario))
+    Admin((Administrador))
 
-    subgraph Sistema_Gestion_Childs [Sistema de Gestión de Hijos]
-        %% Casos de Uso Principales
-        UC1(Iniciar Sesión)
-        UC2(Listar Mis Hijos)
-        UC3(Agregar Nuevo Hijo)
-        UC4(Editar Información de Hijo)
-        UC5(Cambiar Estado de Hijo)
-        UC6(Eliminar Hijo)
+    subgraph Sistema_Integral [Sistema de Gestión]
+        %% Casos de Uso Comunes
+        UC_LOG(Iniciar Sesión)
+        UC_REG(Registrarse)
+        
+        %% Casos de Uso del Usuario (Basado en Gestion_Child.mermaid)
+        UC_LST(Listar Mis Hijos)
+        UC_ADD(Agregar Hijo)
+        UC_EDT(Editar Hijo)
+        UC_STA(Cambiar Estado)
+        UC_DEL(Eliminar Hijo)
 
-        %% Casos de Uso de Soporte / Extensiones
-        UC7(Validar Token)
-        UC8(Verificar Propiedad del Registro)
-        UC9(Error de Autenticación)
+        %% Casos de Uso del Administrador
+        UC_G_USR(Gestionar Usuarios)
+        UC_G_PROD(Gestionar Productos/Servicios)
+        UC_REP(Ver Reportes)
+        UC_FIL(Filtrar Reportes)
+
+        %% Procesos de Soporte (Includes/Extends)
+        UC_VAL(Validar Token)
+        UC_OWN(Verificar Propiedad)
     end
 
-    %% Definición de Sistemas Externos (Actores Secundarios)
+    %% Relaciones del Usuario
+    User --> UC_REG
+    User --> UC_LOG
+    User --> UC_LST
+    User --> UC_ADD
+    User --> UC_EDT
+    User --> UC_STA
+    User --> UC_DEL
+
+    %% Relaciones del Administrador
+    Admin --> UC_LOG
+    Admin --> UC_G_USR
+    Admin --> UC_G_PROD
+    Admin --> UC_REP
+
+    %% Relaciones de Inclusión y Extensión
+    UC_LST -. "«include»" .-> UC_VAL
+    UC_ADD -. "«include»" .-> UC_VAL
+    UC_EDT -. "«include»" .-> UC_VAL
+    UC_EDT -. "«include»" .-> UC_OWN
+    
+    %% Relación de Gestión de Reportes
+    UC_FIL -. "«extend»" .-> UC_REP
+
+    %% Actores Secundarios (Sistemas)
     Servidor[Servidor API]
     BBDD[(Base de Datos)]
 
-    %% Relaciones del Usuario
-    User --> UC1
-    User --> UC2
-    User --> UC3
-    User --> UC4
-    User --> UC5
-    User --> UC6
-
-    %% Relaciones de Inclusión y Extensión (CORREGIDAS)
-    UC2 -. "«include»" .-> UC7
-    UC3 -. "«include»" .-> UC7
-    UC4 -. "«include»" .-> UC7
-    UC4 -. "«include»" .-> UC8
-    UC5 -. "«include»" .-> UC8
-    UC6 -. "«include»" .-> UC8
-
-    UC7 -. "«extend»" .-> UC9
-
-    %% Interacción con Sistemas de Soporte
-    UC1 --- Servidor
-    UC7 --- Servidor
-    UC8 --- BBDD
-    Servidor --- BBDD
+    UC_VAL --- Servidor
+    UC_LOG --- Servidor
+    UC_REG --- BBDD
