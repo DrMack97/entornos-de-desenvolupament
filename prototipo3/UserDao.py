@@ -1,6 +1,9 @@
 from dataclasses import dataclass, asdict
+import hashlib
 from flask import jsonify
 import mysql.connector
+from time import time
+import random
 
 class UserDao:
     
@@ -36,6 +39,46 @@ class UserDao:
         
         return user
     
+    def setTokenUser(self, username):
+        # connexion a BBDD
+        conn=self.connectBBDD()
+        cursor = conn.cursor(dictionary=True)
+        # generar Token
+        token = self.getHash() #token=self.getHash(username)
+        #Update a BBDD camp token al usario por username
+        query = "Update User Set taken = '"+ token +"' where username = '"+username+"'"
+        print(query)
+        cursor.execute(query)
+        
+        """
+            UPDATE * User Set token = 
+            WHERE (username = %s OR email = %s) AND password = %s
+        """
+        # Close BBDD
+        cursor.close()
+        conn.close()
+    
+    def getHash(self, username=""):
+        miliseg = str(int(time() * 1000))
+        data = username + miliseg
+        #2. crear un objeto hash utilizando el algoritmo SHA-256 y pasarle los datos a hashear
+        hash_object = hashlib.sha256(data.encode('utf-8'))
+        #3. obtner el resultado del hash en formato hexadecimal
+        hex_dig = hash_object.hexdigest()
+        
+        return hex_dig
+    
+        
 dao=UserDao()
-u=dao.login("mate","mate")
+print(dao.getHash("usr1",))
+
+u=dao.login("mare","mare")
 print(u)
+
+
+miliseg = str(int(time() * 1000))
+print("Time in milliseconds:", miliseg)
+
+data = "Hola world" + miliseg
+print(data)
+
