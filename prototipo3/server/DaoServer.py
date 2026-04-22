@@ -30,13 +30,17 @@ class UserDao:
         """
         cursor.execute(query,(identifier, identifier, password))
         user = cursor.fetchone()
-        
+        token = ""
+        if user:
+            token = self.setTokenUser(user['username'])
+            print(user)
+            user['token'] = token
+            
         # cerrar conexion 
         cursor.close()
         conn.close()
             # si torna 1 registre user ok
             # si no mensaje 
-        
         return user
     
     def setTokenUser(self, username):
@@ -46,9 +50,13 @@ class UserDao:
         # generar Token
         token = self.getHash() #token=self.getHash(username)
         #Update a BBDD camp token al usario por username
-        query = "Update User Set taken = '"+ token +"' where username = '"+username+"'"
-        print(query)
-        cursor.execute(query)
+        print(type(token))
+        query = "UPDATE User SET token = '"+ token +"' WHERE username = '"+username+"'"
+        
+        
+        cursor.execute(query) # Ejecuta la query 
+        
+        conn.commit() #siempre despues de ejecuta una query HACEMOS COMMIT
         
         """
             UPDATE * User Set token = 
@@ -58,9 +66,9 @@ class UserDao:
         cursor.close()
         conn.close()
     
-    def getHash(self, username=""):
-        miliseg = str(int(time() * 1000))
-        data = username + miliseg
+    def getHash(self):
+        miliseg = str(time() * random.randrange (10000))
+        data =  miliseg
         #2. crear un objeto hash utilizando el algoritmo SHA-256 y pasarle los datos a hashear
         hash_object = hashlib.sha256(data.encode('utf-8'))
         #3. obtner el resultado del hash en formato hexadecimal
@@ -69,8 +77,8 @@ class UserDao:
         return hex_dig
     
         
-dao=UserDao()
-print(dao.getHash("usr1",))
+'''dao=UserDao()
+print(dao.getHash())
 
 u=dao.login("mare","mare")
 print(u)
@@ -79,6 +87,6 @@ print(u)
 miliseg = str(int(time() * 1000))
 print("Time in milliseconds:", miliseg)
 
-data = "Hola world" + miliseg
+data = "Hola world " + miliseg
 print(data)
-
+'''
