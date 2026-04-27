@@ -16,6 +16,25 @@ class UserDao:
         )
         return Connection
     
+    def getUserByToken(self, token):
+        # connexion a BBDD
+        conn=self.connectBBDD()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Query per validar Usr
+        
+        query = "Select * from User where token = '"+ token +"'"
+        
+        cursor.execute(query)
+        user = cursor.fetchone()
+        
+        # cerrar conexion 
+        cursor.close()
+        conn.close()
+            # si torna 1 registre user ok
+            # si no mensaje 
+        return user
+    
     def login(self, identifier, password):
         # connexion a BBDD
         
@@ -53,7 +72,6 @@ class UserDao:
         print(type(token))
         query = "UPDATE User SET token = '"+ token +"' WHERE username = '"+username+"'"
         
-        
         cursor.execute(query) # Ejecuta la query 
         
         conn.commit() #siempre despues de ejecuta una query HACEMOS COMMIT
@@ -75,18 +93,10 @@ class UserDao:
         hex_dig = hash_object.hexdigest()
         
         return hex_dig
-    
-        
-'''dao=UserDao()
-print(dao.getHash())
-
-u=dao.login("mare","mare")
-print(u)
 
 
-miliseg = str(int(time() * 1000))
-print("Time in milliseconds:", miliseg)
 
-data = "Hola world " + miliseg
-print(data)
-'''
+if __name__ == '__main__':
+    dao = UserDao()
+    u = dao.getUserByToken("963a39ec7e53dab8e2af71d4ab7e81b5d7a58896b7f01624376d9c8c29d6ceae")
+    print(u)

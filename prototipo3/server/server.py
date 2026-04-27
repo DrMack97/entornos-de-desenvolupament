@@ -42,6 +42,37 @@ def login():
         )
         return jsonify(asdict(response)), 200
 
+#childs
+@app.route('/child', methods=['POST'])
+def child():
+    token = request.headers.get('Apikey')
+    user = None
+    if (token):
+        # comprovar que el token es correcto ( existe en a u usr)
+        user = userDao.getUserByToken(token)
+    
+    if not user:
+        response = ApiResponse(
+            msg="Invalid token",
+            coderesponse="0",
+            data=None
+        )
+        return jsonify(asdict(response)), 400
+    
+    data = request.get_json()
+    childs = childDao.getChilds(user['id'])
+    response = ApiResponse(
+        msg="getChilds",
+        coderesponse="1",
+        data=childs
+        )
+    return jsonify(asdict(response)), 200
+    
+    
+    
+    data = request.get_json()
+    child=childDao.
+
 
 
 if __name__ == '__main__':
