@@ -1,102 +1,122 @@
 from dataclasses import dataclass, asdict
-import hashlib
 from flask import jsonify
 import mysql.connector
+import hashlib
 from time import time
 import random
 
-class UserDao:
-    
+
+class UserDAO:
+
     def connectBBDD(self):
-        Connection = mysql.connector.connect(
-            host= "localhost",
-            user= "root",
-            password = "david",
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="root",
             database="tapatapp"
         )
-        return Connection
-    
-    def getUserByToken(self, token):
-        # connexion a BBDD
-        conn=self.connectBBDD()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Query per validar Usr
-        
-        query = "Select * from User where token = '"+ token +"'"
-        
+        return connection
+     
+    def getUserByToken(self,token):
+        # connexió a BBDD
+        con=self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
+        query = "SELECT * FROM User WHERE token = '" + token + "'"
         cursor.execute(query)
         user = cursor.fetchone()
-        
-        # cerrar conexion 
         cursor.close()
-        conn.close()
-            # si torna 1 registre user ok
-            # si no mensaje 
+        con.close()
         return user
-    
+
+
     def login(self, identifier, password):
-        # connexion a BBDD
-        
-        conn=self.connectBBDD()
-        cursor = conn.cursor(dictionary=True)
-        
-        # Query per validar Usr
-        
+        # connexió a BBDD
+        con=self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
         query = """
             SELECT * FROM User
             WHERE (username = %s OR email = %s) AND password = %s
         """
-        cursor.execute(query,(identifier, identifier, password))
+        cursor.execute(query, (identifier, identifier, password))
         user = cursor.fetchone()
-        token = ""
+        token=""
         if user:
-            token = self.setTokenUser(user['username'])
-            print(user)
-            user['token'] = token
-            
-        # cerrar conexion 
+            token=self.setTokenUser(user['username'])
+            #print(user)
+            user['token']=token
         cursor.close()
-        conn.close()
-            # si torna 1 registre user ok
-            # si no mensaje 
+        con.close()
         return user
     
     def setTokenUser(self, username):
-        # connexion a BBDD
-        conn=self.connectBBDD()
-        cursor = conn.cursor(dictionary=True)
+        # connectar BBDD
+        con=self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
         # generar Token
-        token = self.getHash() #token=self.getHash(username)
-        #Update a BBDD camp token al usario por username
+        token=self.getHash() #token=self.getHash(username)
+        # Update a BBDD camp Token al usuari per username
         print(type(token))
-        query = "UPDATE User SET token = '"+ token +"' WHERE username = '"+username+"'"
-        
-        cursor.execute(query) # Ejecuta la query 
-        
-        conn.commit() #siempre despues de ejecuta una query HACEMOS COMMIT
-        
-        """
-            UPDATE * User Set token = 
-            WHERE (username = %s OR email = %s) AND password = %s
-        """
+        query = "UPDATE User SET token ='" + token + "' WHERE username = '" + username +"'"
+        # print(query)
+        cursor.execute(query)
+        con.commit()
         # Close BBDD
         cursor.close()
-        conn.close()
+        con.close()
+        return token
     
     def getHash(self):
-        miliseg = str(time() * random.randrange (10000))
-        data =  miliseg
-        #2. crear un objeto hash utilizando el algoritmo SHA-256 y pasarle los datos a hashear
+        milliseconds = str(time() * random.randrange(10000))
+        data=  milliseconds
         hash_object = hashlib.sha256(data.encode('utf-8'))
-        #3. obtner el resultado del hash en formato hexadecimal
-        hex_dig = hash_object.hexdigest()
-        
-        return hex_dig
+        return hash_object.hexdigest() + ""
+    
+    def getHash2(self,username):
+        milliseconds = str(time() * 1000)
+        data=username + milliseconds
+        hash_object =  hashlib.sha256(data.encode('utf-8'))
+        return hash_object.hexdigest() + ""
+
+
+class ChildDAO:
+    
+    def connectBBDD(self):
+        connection = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="root",
+            database="tapatapp"
+        )
+        return connection
+
+    def getChilds(self,id_user):
+        con=self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
+        query = "SELECT distinct Child.* FROM RelationUserChild, Child WHERE RelationUserChild.user_id='"
+        query+= id_user + "' AND RelationUserChild.child_id=Child.id"
+        cursor.execute(query)
+        results = cursor.fetchall()
+        cursor.close()
+        con.close()
+
+        return results
+    
+'''    
+cdao=ChildDAO()
+print(cdao.getChilds("1"))
+print(res)
+   
+
+dao=UserDAO()
+u=dao.getUserByToken("5b8656c4f2dc8461550dc44543e4fdb23a481c1d76fcf2e1353fe5425f50ee40")
+print(u)
+u=dao.getUserByToken("123455")
+print(u)
+'''
 
 
 
-if __name__ == '__main__':
-    dao = UserDao()
-    u = dao.getUserByToken("963a39ec7e53dab8e2af71d4ab7e81b5d7a58896b7f01624376d9c8c29d6ceae")
-    print(u)
+
+
+
+
