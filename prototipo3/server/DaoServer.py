@@ -12,7 +12,7 @@ class UserDAO:
         connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="root",
+            password="david",
             database="tapatapp"
         )
         return connection
@@ -27,8 +27,18 @@ class UserDAO:
         cursor.close()
         con.close()
         return user
-
-
+    
+    # GET TAPS BY ID USER AND ID CHILD
+    def getTapsByIDUserandIDChild(self, id_user, id_child):
+        con=self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
+        query = "SELECT * FROM TAP WHERE ID_USER = '" + id_user + "' AND ID_CHILD = '" + id_child + "' ORDER BY date DESC"
+        cursor.execute(query)
+        taps = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return taps
+    
     def login(self, identifier, password):
         # connexió a BBDD
         con=self.connectBBDD()
@@ -84,7 +94,7 @@ class ChildDAO:
         connection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="root",
+            password="david",
             database="tapatapp"
         )
         return connection
@@ -100,6 +110,23 @@ class ChildDAO:
         con.close()
 
         return results
+    
+    def getChildsTaps(self, id_child):
+        con = self.connectBBDD()
+        cursor = con.cursor(dictionary=True)
+        # Adaptado a la estructura real de tu tabla
+        query = "SELECT id, child_id as id_child, user_id as id_user, init as date, status_id FROM Tap WHERE child_id = %s ORDER BY init DESC"
+        cursor.execute(query, (id_child,))
+        results = cursor.fetchall()
+        cursor.close()
+        con.close()
+        return results
+    
+    
+tapDao=ChildDAO()
+res= tapDao.getChildsTaps("1")
+print(res)  
+
     
 '''    
 cdao=ChildDAO()

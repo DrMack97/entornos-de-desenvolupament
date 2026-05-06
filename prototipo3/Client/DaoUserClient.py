@@ -45,15 +45,56 @@ class DaoUserClient:
                 return user  
         else:
             return None
+    
+    def getChilds(self, token):
+        URL_peticio = self.base_URL + "/child"
+        headers = {'Content-Type': 'application/json', 'api-token': token}
+        
+        try:
+            response = requests.post(URL_peticio, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('coderesponse') == '1':
+                    return data.get('data', [])
+                else:
+                    print(f"Error: {data.get('msg', 'Unknown error')}")
+                    return None
+            else:
+                print(f"HTTP Error: {response.status_code}")
+                return None
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+            return None
+        
+    def getChildTaps(self, token, id_child):
+        URL_peticio = self.base_URL + "/taps"
+        headers = {'Content-Type': 'application/json', 'api-token': token}
+        data = {"id_child": id_child}
+        
+        try:
+            response = requests.post(URL_peticio, json=data, headers=headers)
+            if response.status_code == 200:
+                response_data = response.json()
+                if response_data.get('coderesponse') == '1':
+                    return response_data.get('data', [])
+                else:
+                    print(f"Error: {response_data.get('msg', 'Unknown error')}")
+                    return None
+            else:
+                print(f"HTTP Error: {response.status_code}")
+                return None
+        except Exception as e:
+            print(f"Connection error: {e}")
+            return None
 
-
-
-daoClient=DaoUserClient()
-resposta=daoClient.loginToken("20732fb71deb93f1ec163dc3b03aaafddfff76ccfdf45150e94d01eb099eb651")
+    
+    
+daoUserClient=DaoUserClient()
+resposta=daoUserClient.loginToken("20732fb71deb93f1ec163dc3b03aaafddfff76ccfdf45150e94d01eb099eb651")
 print(resposta)
 '''
 user=User("", "mare", "12345", "", "", "")
-resposta=daoClient.login(user)
+resposta=daoUserClient.login(user)
 print(resposta)
 '''
 '''Servei Login

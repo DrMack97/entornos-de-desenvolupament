@@ -4,7 +4,7 @@ class User:
         self.username = username
         self.password = password
         self.email = email
-        self.idrole = id
+        self.idrole = idrole
         self.token = token
     
     def __str__(self):
